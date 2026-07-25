@@ -1,0 +1,32 @@
+# Environment & Secret files
+.env
+*.env
+
+# Local SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python virtual environment & cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv
+
+# Frontend build & dependencies
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# System & IDE
+.DS_Store
+.vscode/
+.idea/
