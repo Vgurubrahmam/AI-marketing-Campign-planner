@@ -175,7 +175,7 @@ async def regenerate_section(campaign_id: str, section: str) -> None:
                     "personas": [{"persona_name": p.persona_name} for p in campaign.personas],
                     "ad_copies": [{"headline": c.headline, "platform": c.platform} for c in campaign.ad_copies],
                     "keywords": [{"keyword": k.keyword} for k in campaign.keywords],
-                    "budget_allocation": [{"channel": b.channel, "amount": b.amount} for b.budgets],
+                    "budget_allocation": [{"channel": b.channel, "amount": b.amount} for b in campaign.budgets],
                     "schedule": [{"day_offset": s.day_offset, "channel": s.channel} for s in campaign.publishing_plans],
                 })
                 await repo.update_summary(campaign_id, summary_text)
