@@ -41,7 +41,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             try:
                 personas_data = await _generate_personas(product, industry, goal)
             except Exception as e:
-                logger.warning(f"Personas step failed: {e}, falling back")
+                logger.warning(f"⚠️ [FALLBACK WARNING] Personas step failed: {e}, falling back to mock generator")
                 from app.ai.mock_client import generate_mock_personas
                 personas_data = await generate_mock_personas(product, industry, goal)
 
@@ -59,7 +59,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             try:
                 ad_copies = await _generate_ad_copies(product, primary_persona)
             except Exception as e:
-                logger.warning(f"Ad copy step failed: {e}, falling back")
+                logger.warning(f"⚠️ [FALLBACK WARNING] Ad copy step failed: {e}, falling back to mock generator")
                 from app.ai.mock_client import generate_mock_ad_copy
                 ad_copies = [
                     {**(await generate_mock_ad_copy(product, primary_persona, p)), "platform": p}
@@ -79,9 +79,9 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             try:
                 keywords_data = await _generate_keywords(product, industry, ad_copy_context)
             except Exception as e:
-                logger.warning(f"Keywords step failed: {e}, falling back")
+                logger.warning(f"⚠️ [FALLBACK WARNING] Keywords step failed: {e}, falling back to mock generator")
                 from app.ai.mock_client import generate_mock_keywords
-                keywords_data = await generate_mock_keywords(product)
+                keywords_data = await generate_mock_keywords(product, industry)
 
             await repo.add_keywords(campaign_id, keywords_data)
             await repo.update_section_status(campaign_id, "keywords", "done")
@@ -92,7 +92,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             try:
                 budget_data = await _generate_budget(goal, industry, budget_amount, personas_summary)
             except Exception as e:
-                logger.warning(f"Budget step failed: {e}, falling back")
+                logger.warning(f"⚠️ [FALLBACK WARNING] Budget step failed: {e}, falling back to mock generator")
                 from app.ai.mock_client import generate_mock_budget
                 budget_data = await generate_mock_budget(goal, industry, budget_amount)
 
@@ -106,7 +106,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             try:
                 schedule_data = await _generate_schedule(product, platforms_used or PLATFORMS, goal, personas_summary)
             except Exception as e:
-                logger.warning(f"Schedule step failed: {e}, falling back")
+                logger.warning(f"⚠️ [FALLBACK WARNING] Schedule step failed: {e}, falling back to mock generator")
                 from app.ai.mock_client import generate_mock_schedule
                 schedule_data = await generate_mock_schedule([], 4)
 
@@ -129,7 +129,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
                     "schedule": schedule_data,
                 })
             except Exception as e:
-                logger.warning(f"Summary step failed: {e}, falling back")
+                logger.warning(f"⚠️ [FALLBACK WARNING] Summary step failed: {e}, falling back to mock generator")
                 from app.ai.mock_client import generate_mock_summary
                 summary_text = await generate_mock_summary({"product_description": product, "industry": industry, "marketing_goal": goal, "budget_amount": budget_amount})
 
