@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # AI
     groq_api_key: str = ""
     groq_model: str = "llama-3.1-8b-instant"
-    use_mock_ai: bool = True
+    use_mock_ai: bool = False
 
     # App
     cors_origins: str = "http://localhost:5173"

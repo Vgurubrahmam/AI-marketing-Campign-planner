@@ -179,7 +179,7 @@ async def generate_mock_schedule(ad_copies: list, duration_weeks: int = 4) -> li
 
 
 async def generate_mock_summary(campaign_data: dict) -> str:
-    """Return a fully dynamic 3-paragraph executive campaign summary synthesized from section inputs."""
+    """Return a fully dynamic 3-paragraph executive campaign summary synthesized with varied sentence structures."""
     await asyncio.sleep(random.uniform(0.3, 0.5))
     product = campaign_data.get("product_description", "the product")
     prod_title = _extract_product_title(product)
@@ -190,38 +190,53 @@ async def generate_mock_summary(campaign_data: dict) -> str:
     # Dynamic extraction of section content
     personas = campaign_data.get("personas", [])
     persona_names = [p.get("persona_name", "") for p in personas if isinstance(p, dict) and p.get("persona_name")]
-    persona_str = ", ".join(persona_names[:2]) if persona_names else "target buyers"
+    persona_str = ", ".join(persona_names[:2]) if persona_names else "core customer segments"
 
     keywords = campaign_data.get("keywords", [])
     keyword_terms = [k.get("keyword", "") for k in keywords if isinstance(k, dict) and k.get("keyword")]
-    keyword_str = ", ".join(f"'{k}'" for k in keyword_terms[:3]) if keyword_terms else f"keywords for {prod_title.lower()}"
+    keyword_str = ", ".join(f"'{k}'" for k in keyword_terms[:3]) if keyword_terms else f"high-intent search terms"
 
     budgets = campaign_data.get("budget_allocation", [])
     top_channels = [b.get("channel", "") for b in budgets if isinstance(b, dict) and b.get("channel")]
     channel_str = ", ".join(top_channels[:3]) if top_channels else "Google Search, Meta Ads, and Content Marketing"
 
-    # Paragraph 1: Bespoke Product & Persona Synthesis
-    p1 = (
-        f"This strategic campaign for '{prod_title}' is tailored specifically for the {industry} sector "
-        f"to achieve the primary goal of {goal}. Designed around key customer segments—including {persona_str}—the messaging "
-        f"directly addresses main user pain points by emphasizing quality, ease of use, and immediate value proposition. "
-        f"The positioning establishes brand authority while positioning '{prod_title}' as the preferred choice in the market."
-    )
+    # Multiple sentence variant pools for dynamic phrasing
+    p1_openers = [
+        f"Designed specifically for the {industry} sector, this comprehensive campaign for '{prod_title}' focuses on driving {goal}.",
+        f"This strategic marketing initiative positions '{prod_title}' to capture market leadership in {industry} with a focus on {goal}.",
+        f"Focusing on the primary objective of {goal}, this strategic campaign for '{prod_title}' targets key opportunities in {industry}.",
+    ]
+    p1_bodies = [
+        f"By addressing specific friction points faced by {persona_str}, the messaging establishes clear brand differentiation and consumer trust.",
+        f"Tailored around the distinct needs of {persona_str}, the positioning highlights superior value, reliability, and effortless adoption.",
+        f"Engaging core audience personas such as {persona_str}, the strategic narrative emphasizes high quality and immediate problem resolution.",
+    ]
 
-    # Paragraph 2: Bespoke Multi-Channel & Budget Allocation Synthesis
-    p2 = (
-        f"To maximize return on investment, the total budget of ₹{budget:,.2f} is strategically distributed across "
-        f"high-performing acquisition channels led by {channel_str}. High-intent search acquisition targets terms such as {keyword_str}, "
-        f"capturing active consumer demand. Meanwhile, visual social campaign creatives build upper-funnel brand awareness and engagement, "
-        f"supported by email nurture sequences that drive repeat engagement and maximize customer lifetime value."
-    )
+    p2_openers = [
+        f"Capitalizing on an overall campaign budget of ₹{budget:,.2f}, funds are allocated strategically across top acquisition channels including {channel_str}.",
+        f"With a total investment of ₹{budget:,.2f}, the multi-channel acquisition model prioritizes high-performing platforms led by {channel_str}.",
+        f"Backed by a structured budget of ₹{budget:,.2f}, execution is focused on high-yielding channels including {channel_str}.",
+    ]
+    p2_bodies = [
+        f"High-intent search capture targets keywords such as {keyword_str}, while visual social advertising builds active brand engagement and funnel velocity.",
+        f"Targeted search ads focus on core terms including {keyword_str}, supported by social media campaigns that cultivate audience interest and repeat visits.",
+        f"Organic and paid search campaigns prioritize search intent around {keyword_str}, while retargeting sequences maintain high conversion efficiency.",
+    ]
 
-    # Paragraph 3: Bespoke Roadmap & Metrics Synthesis
-    p3 = (
-        f"The campaign follows a structured 28-day multi-stage roadmap focused on driving scalable growth. Phase 1 (Days 1–7) "
-        f"initiates multi-channel ad testing and baseline data collection. Phase 2 (Days 8–14) executes mid-campaign performance reviews, "
-        f"reallocating budget towards top-performing ad assets and keyword targets. Phase 3 (Days 15–28) scales high-converting ad sets, "
-        f"ensuring optimal Return on Ad Spend (ROAS) and a lean Cost Per Acquisition for '{prod_title}'."
-    )
+    p3_openers = [
+        f"The 28-day campaign execution roadmap is structured into three distinct performance phases.",
+        f"A 28-day phased implementation plan ensures continuous optimization and scalable acquisition.",
+        f"Execution unfolds over a 28-day performance roadmap designed for rapid testing and scaling.",
+    ]
+    p3_bodies = [
+        f"Initial creative validation during Days 1–7 feeds into mid-campaign budget reallocation at Day 14, culminating in aggressive scaling through Day 28 to ensure optimal ROAS for '{prod_title}'.",
+        f"Days 1–7 establish baseline metrics, followed by Day 14 optimization checkpoints and full campaign scaling by Day 28 to maximize ROI for '{prod_title}'.",
+        f"Early testing in Week 1 leads to strategic budget adjustments at Day 14, scaling high-converting creative assets through Day 28 for '{prod_title}'.",
+    ]
+
+    # Randomly select variants so no two calls produce identical connective phrasing
+    p1 = f"{random.choice(p1_openers)} {random.choice(p1_bodies)}"
+    p2 = f"{random.choice(p2_openers)} {random.choice(p2_bodies)}"
+    p3 = f"{random.choice(p3_openers)} {random.choice(p3_bodies)}"
 
     return f"{p1}\n\n{p2}\n\n{p3}"
