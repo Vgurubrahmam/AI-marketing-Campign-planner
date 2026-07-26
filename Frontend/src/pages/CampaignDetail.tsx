@@ -249,7 +249,7 @@ function PersonaSection({ personas, onCopy, copiedId }: { personas: any[]; onCop
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
                 {Object.entries(p.demographics).map(([k, v]) => (
                   <span key={k} className="badge badge-primary" style={{ fontSize: '0.6875rem' }}>
-                    {String(v)}
+                    {String(v).replace(/\$/g, '₹')}
                   </span>
                 ))}
               </div>
