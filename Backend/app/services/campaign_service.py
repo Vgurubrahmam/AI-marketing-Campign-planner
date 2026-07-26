@@ -217,19 +217,20 @@ async def _generate_ad_copies(product: str, persona: dict) -> list[dict]:
             for copy, platform in zip(results, PLATFORMS)
         ]
     else:
-        from app.ai.prompts.adcopy import generate_ad_copy
+        from app.ai.prompts.adcopy import generate_all_ad_copies
         from app.ai.mock_client import generate_mock_ad_copy
+
+        try:
+            copies = await generate_all_ad_copies(product, persona)
+            if copies and len(copies) > 0:
+                return copies
+        except Exception as e:
+            logger.warning(f"Batch ad copy generation failed: {e}, using dynamic fallback")
 
         out_copies = []
         for platform in PLATFORMS:
-            try:
-                copy = await generate_ad_copy(product, persona, platform)
-                out_copies.append({**copy, "platform": platform})
-                await asyncio.sleep(0.4)
-            except Exception as e:
-                logger.warning(f"Ad copy generation failed for {platform}: {e}, using dynamic fallback")
-                fallback = await generate_mock_ad_copy(product, persona, platform)
-                out_copies.append({**fallback, "platform": platform})
+            fallback = await generate_mock_ad_copy(product, persona, platform)
+            out_copies.append({**fallback, "platform": platform})
         return out_copies
 
 
