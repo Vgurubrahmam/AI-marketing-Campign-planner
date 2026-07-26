@@ -18,12 +18,10 @@ Schema:
   ]
 }
 
-Create a realistic 28-day publishing schedule with 12-15 entries. Include:
-- Launch day activities (day 1)
-- Regular content cadence per channel
-- Mid-campaign optimization checkpoint (around day 14)
-- End-of-campaign activities (around day 28)
-- Mix of paid ads, organic content, and email touches"""
+STRICT GENERATION RULES:
+1. CURRENCY CONSISTENCY: All monetary figures (CPC, budget caps, CAC) MUST use ₹ (INR) or relative metrics. NEVER use dollar ($) signs or USD figures.
+2. PERSONA NAMES: If referencing target audience personas by name in content summaries, use EXACT persona names provided in the user prompt (e.g. 'Simple Sarah', 'Mindful Mike'). NEVER combine, invent, or blend persona names (do NOT write 'Simple Mike').
+3. Create a realistic 28-day publishing schedule with 8-12 entries following a Launch → Optimize → Scale cadence."""
 
 
 def build_user_prompt(
@@ -38,9 +36,9 @@ Marketing Goal: {goal}
 
 Active Platforms: {', '.join(platforms)}
 
-Target Audience Summary: {personas_summary}
+Target Audience Personas: {personas_summary}
 
-Create a 28-day publishing and activity schedule across these platforms. The schedule should follow a launch → optimize → scale cadence with clear milestones. Each entry should have a specific, actionable content summary — not vague tasks."""
+Create a 28-day publishing and activity schedule across these platforms. The schedule should follow a launch → optimize → scale cadence with clear milestones. Each entry should have a specific, actionable content summary using INR (₹) for any currency metrics and exact persona names."""
 
 
 async def generate_schedule(

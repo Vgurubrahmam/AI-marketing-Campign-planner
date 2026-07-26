@@ -353,7 +353,7 @@ def _get_reasoning_for_channel(channel: str, reasoning_items: list[dict]) -> str
     elif "meta" in ch_lower or "facebook" in ch_lower or "instagram" in ch_lower:
         return "Visual product creative and targeted social campaigns to build brand awareness and retargeting engagement."
     elif "linkedin" in ch_lower:
-        return "B2B professional audience targeting to build credibility and reach key decision-makers."
+        return "Targeting career-minded professionals and affluent consumers with high engagement potential."
     elif "influencer" in ch_lower or "partner" in ch_lower:
         return "Targeted influencer sampling and partner endorsements to build authentic social proof."
 
