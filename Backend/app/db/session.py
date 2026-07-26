@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 from app.core.config import settings
 
 # SQLite needs special handling: connect_args for thread safety, StaticPool for async
-is_sqlite = settings.database_url.startswith("sqlite")
+is_sqlite = settings.async_database_url.startswith("sqlite")
 
 engine_kwargs = {
     "echo": False,
@@ -19,7 +19,7 @@ else:
     engine_kwargs["pool_size"] = 5
     engine_kwargs["max_overflow"] = 10
 
-engine = create_async_engine(settings.database_url, **engine_kwargs)
+engine = create_async_engine(settings.async_database_url, **engine_kwargs)
 
 async_session = async_sessionmaker(
     engine,
