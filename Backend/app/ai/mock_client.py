@@ -13,6 +13,23 @@ STOP_WORDS = {
 }
 
 
+def format_currency_inr(amount: float) -> str:
+    """Format float amount into Indian currency format (e.g., ₹5,00,000)."""
+    val = int(round(amount))
+    s = str(val)
+    if len(s) <= 3:
+        return f"₹{s}"
+    last_three = s[-3:]
+    other = s[:-3]
+    parts = []
+    while len(other) > 2:
+        parts.insert(0, other[-2:])
+        other = other[:-2]
+    if other:
+        parts.insert(0, other)
+    return f"₹{','.join(parts)},{last_three}"
+
+
 def _extract_product_title(product_description: str) -> str:
     """Extract a clean product subject string without trailing ellipsis."""
     clean = product_description.strip().split('.')[0]
@@ -34,58 +51,79 @@ async def generate_mock_personas(product_description: str, industry: str, goal: 
     await asyncio.sleep(random.uniform(0.3, 0.5))
     prod_title = _extract_product_title(product_description)
     ind = industry.replace('_', ' ').capitalize()
+    domain_terms = _extract_domain_keywords(product_description, industry)
+    dt1 = domain_terms[0].capitalize() if domain_terms else "Quality"
+    dt2 = domain_terms[1].capitalize() if len(domain_terms) > 1 else "Convenient"
+
+    prod_lower = product_description.lower()
+    if "clean" in prod_lower or "home" in prod_lower or "house" in prod_lower:
+        p1_name = "Eco-Conscious Parent"
+        p2_name = "Busy Professional"
+        p3_name = "Health-Conscious Homeowner"
+    elif "skin" in prod_lower or "beauty" in prod_lower or "cosmetic" in prod_lower:
+        p1_name = "Minimalist Beauty Buyer"
+        p2_name = "Sensitive-Skin Shopper"
+        p3_name = "Busy Lifestyle Consumer"
+    elif "freelanc" in prod_lower or "tax" in prod_lower or "finance" in prod_lower or "expense" in prod_lower:
+        p1_name = "Independent Contractor"
+        p2_name = "Freelance Consultant"
+        p3_name = "Solopreneur Founder"
+    else:
+        p1_name = f"Eco-{dt1} Buyer"
+        p2_name = f"Busy {dt2} User"
+        p3_name = f"Value-Driven Consumer"
 
     return [
         {
-            "persona_name": f"Simple Sarah",
+            "persona_name": p1_name,
             "demographics": {
                 "age_range": "25-42",
-                "gender": "Female",
-                "income": "Mid to High Income",
+                "gender": "Female / Diverse",
+                "income": "₹6,00,000 - ₹10,00,000 / year",
                 "education": "Bachelor's Degree",
                 "location": "Metro & Urban areas",
             },
             "pain_points": [
                 f"Overwhelmed by complex options for {prod_title.lower()}",
-                "Needs a fast, 3-step streamlined routine without clutter",
-                "Concerned about product safety and gentle ingredients",
+                "Needs a fast, reliable solution without extra hassle",
+                "Demands safety, quality standards, and transparent pricing",
             ],
-            "channels": ["Instagram", "Google Search", "Pinterest", "Email"],
-            "messaging_angle": f"Highlight 3-step simplicity and clean ingredients for {prod_title.lower()}.",
+            "channels": ["Instagram", "Google Ads (Search)", "Content Marketing & SEO", "Email Marketing"],
+            "messaging_angle": f"Highlight simplicity, safety, and guaranteed quality for {prod_title.lower()}.",
         },
         {
-            "persona_name": f"Mindful Mike",
+            "persona_name": p2_name,
             "demographics": {
                 "age_range": "28-48",
-                "gender": "Male",
-                "income": "Moderate to High Income",
+                "gender": "Male / Diverse",
+                "income": "₹8,00,000 - ₹15,00,000 / year",
                 "education": "College Degree",
                 "location": "Suburban & Urban",
             },
             "pain_points": [
-                "Sensitive skin irritation from harsh commercial products",
-                "Wants straightforward skincare that delivers consistent results",
-                "Demands clear product value without hype",
+                f"Lack of time to handle {prod_title.lower()} independently",
+                "Wants straightforward service delivering consistent results",
+                "Demands transparent pricing without hidden fees",
             ],
-            "channels": ["Google Search", "YouTube", "Reddit", "Facebook"],
-            "messaging_angle": f"Emphasize gentle formulation and dermatologist-backed results for {prod_title.lower()}.",
+            "channels": ["Google Ads (Search)", "YouTube", "Content Marketing & SEO", "Meta Ads (Facebook/Instagram)"],
+            "messaging_angle": f"Emphasize time-saving convenience and verified customer results for {prod_title.lower()}.",
         },
         {
-            "persona_name": "Busy Becca",
+            "persona_name": p3_name,
             "demographics": {
                 "age_range": "30-52",
-                "gender": "Female",
-                "income": "High Income",
+                "gender": "Diverse",
+                "income": "₹12,00,000+ / year",
                 "education": "Graduate Degree",
                 "location": "Major Urban Centers",
             },
             "pain_points": [
-                "Zero time for multi-step beauty routines",
-                "Seeking high-performance skincare that fits active lifestyle",
-                "Needs subscription convenience and fast delivery",
+                f"Seeking premium, hassle-free solutions for {prod_title.lower()}",
+                "Requires flexible scheduling or subscription options",
+                "Values sustainable and non-toxic standards",
             ],
-            "channels": ["Instagram", "LinkedIn", "Podcasts", "Email"],
-            "messaging_angle": f"Focus on time-saving efficiency and subscription convenience for {prod_title.lower()}.",
+            "channels": ["Meta Ads (Facebook/Instagram)", "LinkedIn Ads", "Email Marketing"],
+            "messaging_angle": f"Focus on premium quality, reliability, and subscription convenience for {prod_title.lower()}.",
         },
     ]
 
@@ -164,17 +202,30 @@ async def generate_mock_budget(
     return allocations
 
 
-async def generate_mock_schedule(ad_copies: list, duration_weeks: int = 4) -> list[dict]:
-    """Return dynamic publishing schedule with strict INR currency and exact persona names."""
+async def generate_mock_schedule(
+    product_description: str = "", personas_summary: str = "", goal: str = "growth"
+) -> list[dict]:
+    """Return dynamic publishing schedule using current campaign's product and personas."""
     await asyncio.sleep(random.uniform(0.2, 0.4))
+    prod_title = _extract_product_title(product_description) if product_description else "the product"
+
+    persona_names = []
+    if personas_summary:
+        parts = [p.strip() for p in personas_summary.split(",") if p.strip()]
+        persona_names = [p.split(":")[0].strip() for p in parts if p.strip()]
+
+    p1 = persona_names[0] if len(persona_names) > 0 else "Primary Persona"
+    p2 = persona_names[1] if len(persona_names) > 1 else "Secondary Persona"
+    p3 = persona_names[2] if len(persona_names) > 2 else "Target Audience"
+
     return [
-        {"day_offset": 1, "channel": "Google Search", "content_summary": "Launch targeted Google Search ads focusing on high-intent terms. Target CPC under ₹80."},
-        {"day_offset": 2, "channel": "Meta & Instagram", "content_summary": "Publish core problem-solution video carousel targeting Simple Sarah and Mindful Mike."},
-        {"day_offset": 5, "channel": "Blog & Content", "content_summary": "Publish comprehensive routine guide addressing sensitive skin pain points."},
-        {"day_offset": 8, "channel": "Email Campaign", "content_summary": "Send launch announcement email sequence with exclusive subscriber discount."},
-        {"day_offset": 14, "channel": "Performance Review", "content_summary": "Analyze initial CTR and CAC metrics; reallocate budget to top-performing ad variants."},
-        {"day_offset": 21, "channel": "Retargeting Ads", "content_summary": "Deploy retargeting ads targeting Busy Becca with verified customer reviews."},
-        {"day_offset": 28, "channel": "Monthly Scaling", "content_summary": "Evaluate overall Return on Ad Spend (ROAS) in INR and scale winning campaigns into the next month."},
+        {"day_offset": 1, "channel": "Google Search Ads", "content_summary": f"Launch targeted Google Search ads for '{prod_title}' focusing on high-intent search terms. Target CPC under ₹80."},
+        {"day_offset": 2, "channel": "Meta Ads (Facebook/Instagram)", "content_summary": f"Publish core problem-solution video carousel targeting {p1} and {p2} highlighting key product benefits."},
+        {"day_offset": 5, "channel": "Content Marketing & SEO", "content_summary": f"Publish comprehensive buyer's guide addressing top customer pain points for {p1}."},
+        {"day_offset": 8, "channel": "Email Marketing", "content_summary": f"Send launch announcement email sequence for '{prod_title}' to subscriber list with exclusive subscriber offer."},
+        {"day_offset": 14, "channel": "Performance Checkpoint", "content_summary": f"Analyze initial CTR and CAC metrics for '{prod_title}'; reallocate budget to top-performing ad creative variants."},
+        {"day_offset": 21, "channel": "Retargeting Ads", "content_summary": f"Deploy retargeting ads targeting {p3} featuring verified customer reviews and social proof."},
+        {"day_offset": 28, "channel": "Campaign Scaling", "content_summary": f"Evaluate overall Return on Ad Spend (ROAS) in INR and scale winning ad sets for '{prod_title}' into the next phase."},
     ]
 
 
@@ -212,10 +263,12 @@ async def generate_mock_summary(campaign_data: dict) -> str:
         f"Engaging core audience personas such as {persona_str}, the strategic narrative emphasizes high quality and immediate problem resolution.",
     ]
 
+    budget_formatted = format_currency_inr(budget)
+
     p2_openers = [
-        f"Capitalizing on an overall campaign budget of ₹{budget:,.2f}, funds are allocated strategically across top acquisition channels including {channel_str}.",
-        f"With a total investment of ₹{budget:,.2f}, the multi-channel acquisition model prioritizes high-performing platforms led by {channel_str}.",
-        f"Backed by a structured budget of ₹{budget:,.2f}, execution is focused on high-yielding channels including {channel_str}.",
+        f"Capitalizing on an overall campaign budget of {budget_formatted}, funds are allocated strategically across top acquisition channels including {channel_str}.",
+        f"With a total investment of {budget_formatted}, the multi-channel acquisition model prioritizes high-performing platforms led by {channel_str}.",
+        f"Backed by a structured budget of {budget_formatted}, execution is focused on high-yielding channels including {channel_str}.",
     ]
     p2_bodies = [
         f"High-intent search capture targets keywords such as {keyword_str}, while visual social advertising builds active brand engagement and funnel velocity.",

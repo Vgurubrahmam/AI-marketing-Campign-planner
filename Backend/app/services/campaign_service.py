@@ -365,7 +365,7 @@ async def _generate_schedule(
 ) -> list[dict]:
     if settings.use_mock_ai:
         from app.ai.mock_client import generate_mock_schedule
-        return await generate_mock_schedule([], 4)
+        return await generate_mock_schedule(product, personas_summary, goal)
     else:
         try:
             from app.ai.prompts.schedule import generate_schedule
@@ -373,10 +373,10 @@ async def _generate_schedule(
             if data and isinstance(data, list) and len(data) > 0:
                 return data
         except Exception as e:
-            logger.warning(f"Schedule LLM call failed: {e}, using dynamic fallback")
+            logger.warning(f"⚠️ [FALLBACK WARNING] Schedule LLM call failed: {e}, using dynamic fallback")
 
         from app.ai.mock_client import generate_mock_schedule
-        return await generate_mock_schedule([], 4)
+        return await generate_mock_schedule(product, personas_summary, goal)
 
 
 async def _generate_summary(campaign_data: dict) -> str:

@@ -27,6 +27,9 @@ Schema:
   ]
 }
 
+STRICT CURRENCY RULE:
+If mentioning prices, packages, or discounts in ad copy, use ₹ (INR) or percentage discounts (e.g., 'Starting at ₹499' or 'Save 20%'). NEVER output dollar ($) signs or USD prices (do NOT write '$85').
+
 Write high-converting ad copy for all 4 specified platforms (google, meta, linkedin, instagram). Ensure character limits per platform are respected."""
 
 
@@ -43,7 +46,7 @@ Platform Character Limits:
 - linkedin: Headline max 70 chars, Body max 150 chars
 - instagram: Headline max 40 chars, Body max 125 chars
 
-Write high-converting ad copy for each of the 4 platforms (google, meta, linkedin, instagram). The copy should speak directly to the persona's pain points."""
+Write high-converting ad copy for each of the 4 platforms (google, meta, linkedin, instagram). The copy should speak directly to the persona's pain points using INR (₹) for any prices."""
 
 
 async def generate_all_ad_copies(
@@ -66,6 +69,6 @@ async def generate_ad_copy(
     return {
         "platform": platform,
         "headline": f"Discover {product_description[:25]}",
-        "body": "Streamline your workflows and boost productivity starting today.",
+        "body": "Streamline your routine and get superior results starting today.",
         "cta": "Learn More",
     }

@@ -17,7 +17,9 @@ Schema:
   ]
 }
 
-Provide strategic reasoning for each budget allocation. Reference the specific marketing goal, industry context, and target personas when explaining allocations."""
+STRICT CONSTRAINTS:
+1. B2C vs B2B RULE: Check if the business/product is B2C (e.g. consumer products, home cleaning, retail, skincare). For B2C campaigns, NEVER label LinkedIn or any channel as 'B2B'. Instead, describe LinkedIn as reaching affluent professionals or career-minded consumers in their personal capacity.
+2. Provide strategic reasoning for each budget allocation. Reference the specific marketing goal, industry context, and target personas when explaining allocations."""
 
 
 def build_user_prompt(
