@@ -50,7 +50,7 @@ class Campaign(Base):
     # AI-generated executive summary text
     summary: Mapped[str] = mapped_column(Text, nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
     # Relationships
