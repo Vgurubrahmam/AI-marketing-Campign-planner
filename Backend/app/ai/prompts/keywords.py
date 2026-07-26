@@ -17,13 +17,11 @@ Schema:
   ]
 }
 
-Generate 10-15 keywords. Include a mix of:
-- High-intent transactional keywords (people ready to buy/sign up)
-- Informational keywords (people researching the problem space)
-- Long-tail variations that are specific to the product
-- Both SEO (organic content targets) and PPC (paid ad targets)
-
-Rank by relevance_score where 1.0 = perfectly relevant to the product."""
+CRITICAL RULES:
+1. GROUND IN THE SPECIFIC PRODUCT: Extract keywords that directly describe the exact product type (e.g., skincare, facial cleanser, freelance accounting, organic snacks).
+2. DO NOT use generic software/SaaS suffixes ("app", "software", "tool", "platform") unless the product is explicitly a software application!
+3. DO NOT treat business model descriptors like "direct-to-consumer" or "d2c" as the main product noun. Extract the actual product/service being sold (e.g. "minimalist skincare routine", "sensitive skin moisturizer").
+4. Provide 10-15 keywords with a healthy mix of transactional (buy/order/pricing), informational (how to/benefits/guide), and long-tail terms."""
 
 
 def build_user_prompt(product_description: str, industry: str, ad_copy_context: str = "") -> str:
@@ -33,7 +31,7 @@ Industry: {industry}
 
 {f'Ad Copy Context (for keyword grounding): {ad_copy_context}' if ad_copy_context else ''}
 
-Extract and generate keywords that a potential customer would search for when looking for this product or solutions to the problems it solves. Ground keywords in the actual product description — avoid generic industry terms unless they're genuinely relevant."""
+Generate 10-15 hyper-relevant search keywords that customers search for when looking for this specific product or solving the exact problem it addresses."""
 
 
 async def generate_keywords(product_description: str, industry: str, ad_copy_context: str = "") -> list[dict]:
