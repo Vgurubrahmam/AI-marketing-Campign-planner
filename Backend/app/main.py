@@ -23,8 +23,12 @@ from app.models import (  # noqa: F401
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Create database tables on startup (dev convenience; use Alembic in production)."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("INFO: Database tables initialized successfully.")
+    except Exception as e:
+        print(f"ERROR: Database startup initialization failed: {e}")
     yield
 
 
