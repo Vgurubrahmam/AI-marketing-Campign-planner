@@ -16,6 +16,7 @@ if is_sqlite:
     engine_kwargs["connect_args"] = {"check_same_thread": False}
     engine_kwargs["poolclass"] = StaticPool
 else:
+    engine_kwargs["connect_args"] = {"statement_cache_size": 0}
     engine_kwargs["pool_size"] = 5
     engine_kwargs["max_overflow"] = 10
 
