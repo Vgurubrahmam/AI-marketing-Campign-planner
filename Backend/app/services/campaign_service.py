@@ -287,14 +287,14 @@ async def _generate_budget(
 ) -> list[dict]:
     from app.services.budget_rules import compute_budget_allocation
 
-    # Step 1: Deterministic allocation
+    # Step 1: Deterministic allocation from rules engine
     allocations = compute_budget_allocation(goal, industry, budget_amount)
 
     if settings.use_mock_ai:
         from app.ai.mock_client import generate_mock_budget
         mock_data = await generate_mock_budget(goal, industry, budget_amount)
-        for alloc, mock in zip(allocations, mock_data):
-            alloc["reasoning"] = mock.get("reasoning", "")
+        for alloc in allocations:
+            alloc["reasoning"] = _get_reasoning_for_channel(alloc["channel"], mock_data)
         return allocations
     else:
         try:
@@ -303,24 +303,61 @@ async def _generate_budget(
             reasoning_data = await generate_budget_reasoning(
                 goal, industry, budget_amount, allocations, personas_summary
             )
-            reasoning_map = {}
-            if isinstance(reasoning_data, list):
-                for r in reasoning_data:
-                    if isinstance(r, dict) and "channel" in r:
-                        reasoning_map[r["channel"]] = r.get("reasoning", "")
+            reasoning_items = reasoning_data if isinstance(reasoning_data, list) else []
             for alloc in allocations:
-                alloc["reasoning"] = reasoning_map.get(
-                    alloc["channel"],
-                    f"Strategic allocation of {alloc['allocation_percent']}% targeting optimal reach for {goal.replace('_', ' ')}."
-                )
+                alloc["reasoning"] = _get_reasoning_for_channel(alloc["channel"], reasoning_items)
             return allocations
         except Exception as e:
-            logger.warning(f"Budget reasoning LLM call failed: {e}, using dynamic fallback")
+            logger.warning(f"⚠️ [FALLBACK WARNING] Budget reasoning LLM call failed: {e}, using dynamic fallback")
             from app.ai.mock_client import generate_mock_budget
             mock_data = await generate_mock_budget(goal, industry, budget_amount)
-            for alloc, mock in zip(allocations, mock_data):
-                alloc["reasoning"] = mock.get("reasoning", "")
+            for alloc in allocations:
+                alloc["reasoning"] = _get_reasoning_for_channel(alloc["channel"], mock_data)
             return allocations
+
+
+def _get_reasoning_for_channel(channel: str, reasoning_items: list[dict]) -> str:
+    """Find channel reasoning by fuzzy keyword matching instead of positional zip."""
+    ch_lower = channel.lower()
+
+    # Exact or substring channel match check
+    for item in reasoning_items:
+        if isinstance(item, dict):
+            item_ch = str(item.get("channel", "")).lower()
+            if item_ch == ch_lower or item_ch in ch_lower or ch_lower in item_ch:
+                res = item.get("reasoning", "").strip()
+                if res:
+                    return res
+
+    # Semantic channel keyword match check
+    for item in reasoning_items:
+        if isinstance(item, dict):
+            item_ch = str(item.get("channel", "")).lower()
+            if ("email" in ch_lower and "email" in item_ch) or \
+               (("content" in ch_lower or "seo" in ch_lower) and ("content" in item_ch or "seo" in item_ch)) or \
+               (("google" in ch_lower or "search" in ch_lower) and ("google" in item_ch or "search" in item_ch)) or \
+               (("meta" in ch_lower or "facebook" in ch_lower or "instagram" in ch_lower) and ("meta" in item_ch or "social" in item_ch or "facebook" in item_ch)) or \
+               ("linkedin" in ch_lower and "linkedin" in item_ch) or \
+               (("influencer" in ch_lower or "partner" in ch_lower) and ("influencer" in item_ch or "partner" in item_ch)):
+                res = item.get("reasoning", "").strip()
+                if res:
+                    return res
+
+    # Fallback per channel category
+    if "email" in ch_lower:
+        return "Automated email welcome series, lead nurturing, and repeat customer incentives to maximize customer LTV."
+    elif "content" in ch_lower or "seo" in ch_lower:
+        return "Long-term organic search authority and educational content driving sustainable organic traffic."
+    elif "google" in ch_lower:
+        return "High-intent search ads capturing prospects actively seeking solutions with clear purchase intent."
+    elif "meta" in ch_lower or "facebook" in ch_lower or "instagram" in ch_lower:
+        return "Visual product creative and targeted social campaigns to build brand awareness and retargeting engagement."
+    elif "linkedin" in ch_lower:
+        return "B2B professional audience targeting to build credibility and reach key decision-makers."
+    elif "influencer" in ch_lower or "partner" in ch_lower:
+        return "Targeted influencer sampling and partner endorsements to build authentic social proof."
+
+    return "Strategic budget allocation focused on high-converting audience reach and ROI."
 
 
 async def _generate_schedule(
