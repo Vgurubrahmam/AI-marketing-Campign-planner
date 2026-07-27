@@ -36,7 +36,7 @@ export const TrendingKeywordsCard: React.FC<TrendingKeywordsCardProps> = ({
               padding: '16px',
               display: 'flex',
               flexDirection: 'column',
-              justify: 'space-between',
+              justifyContent: 'space-between',
               borderLeft: '4px solid #3b82f6',
               borderRadius: 'var(--radius-md)',
               background: 'var(--color-bg-secondary)',

@@ -37,7 +37,7 @@ export const CompetitorsCard: React.FC<CompetitorsCardProps> = ({
               padding: '18px',
               display: 'flex',
               flexDirection: 'column',
-              justify: 'space-between',
+              justifyContent: 'space-between',
               borderLeft: '4px solid #f43f5e',
               borderRadius: 'var(--radius-md)',
               background: 'var(--color-bg-secondary)',
@@ -54,7 +54,7 @@ export const CompetitorsCard: React.FC<CompetitorsCardProps> = ({
                       background: 'rgba(244, 63, 94, 0.15)',
                       display: 'flex',
                       alignItems: 'center',
-                      justify: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     <Shield size={15} color="#f43f5e" />
