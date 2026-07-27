@@ -88,7 +88,33 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             await db.commit()
             logger.info(f"Campaign {campaign_id}: keywords done")
 
-            # ---- Step 4: Generate Budget ----
+            # ---- Step 4: Generate Trending Keywords ----
+            try:
+                trending_data = await _generate_trending_keywords(product, industry)
+            except Exception as e:
+                logger.warning(f"⚠️ [FALLBACK WARNING] Trending keywords step failed: {e}, falling back to mock generator")
+                from app.ai.mock_client import generate_mock_trending_keywords
+                trending_data = await generate_mock_trending_keywords(product, industry)
+
+            await repo.add_trending_keywords(campaign_id, trending_data)
+            await repo.update_section_status(campaign_id, "trending", "done")
+            await db.commit()
+            logger.info(f"Campaign {campaign_id}: trending keywords done")
+
+            # ---- Step 5: Generate Competitor Research ----
+            try:
+                competitor_data = await _generate_competitors(product, industry)
+            except Exception as e:
+                logger.warning(f"⚠️ [FALLBACK WARNING] Competitor research step failed: {e}, falling back to mock generator")
+                from app.ai.mock_client import generate_mock_competitors
+                competitor_data = await generate_mock_competitors(product, industry)
+
+            await repo.add_competitors(campaign_id, competitor_data)
+            await repo.update_section_status(campaign_id, "competitors", "done")
+            await db.commit()
+            logger.info(f"Campaign {campaign_id}: competitors done")
+
+            # ---- Step 6: Generate Budget ----
             try:
                 budget_data = await _generate_budget(goal, industry, budget_amount, personas_summary)
             except Exception as e:
@@ -101,7 +127,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             await db.commit()
             logger.info(f"Campaign {campaign_id}: budget done")
 
-            # ---- Step 5: Generate Schedule ----
+            # ---- Step 7: Generate Schedule ----
             platforms_used = list(set(c.get("platform", "") for c in ad_copies))
             try:
                 schedule_data = await _generate_schedule(product, platforms_used or PLATFORMS, goal, personas_summary)
@@ -115,7 +141,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             await db.commit()
             logger.info(f"Campaign {campaign_id}: schedule done")
 
-            # ---- Step 6: Generate Summary ----
+            # ---- Step 8: Generate Summary ----
             try:
                 summary_text = await _generate_summary({
                     "product_description": product,
@@ -125,6 +151,8 @@ async def run_generation_pipeline(campaign_id: str) -> None:
                     "personas": personas_data,
                     "ad_copies": ad_copies,
                     "keywords": keywords_data,
+                    "trending_keywords": trending_data,
+                    "competitors": competitor_data,
                     "budget_allocation": budget_data,
                     "schedule": schedule_data,
                 })
@@ -147,7 +175,7 @@ async def run_generation_pipeline(campaign_id: str) -> None:
             logger.error(f"Campaign {campaign_id} generation pipeline encountered unhandled exception: {e}")
             try:
                 # Ensure all section statuses are marked so frontend never hangs indefinitely
-                for sec in ["persona", "ad_copy", "keywords", "budget", "schedule", "summary"]:
+                for sec in ["persona", "ad_copy", "keywords", "trending", "competitors", "budget", "schedule", "summary"]:
                     await repo.update_section_status(campaign_id, sec, "done")
                 await repo.update_campaign_status(campaign_id, "complete")
                 await db.commit()
@@ -194,6 +222,12 @@ async def regenerate_section(campaign_id: str, section: str) -> None:
             elif section == "keywords":
                 data = await _generate_keywords(product, industry)
                 await repo.add_keywords(campaign_id, data)
+            elif section == "trending":
+                data = await _generate_trending_keywords(product, industry)
+                await repo.add_trending_keywords(campaign_id, data)
+            elif section == "competitors":
+                data = await _generate_competitors(product, industry)
+                await repo.add_competitors(campaign_id, data)
             elif section == "budget":
                 personas_summary = ", ".join(
                     p.persona_name for p in campaign.personas
@@ -394,3 +428,38 @@ async def _generate_summary(campaign_data: dict) -> str:
 
         from app.ai.mock_client import generate_mock_summary
         return await generate_mock_summary(campaign_data)
+
+
+async def _generate_trending_keywords(product: str, industry: str) -> list[dict]:
+    if settings.use_mock_ai:
+        from app.ai.mock_client import generate_mock_trending_keywords
+        return await generate_mock_trending_keywords(product, industry)
+    else:
+        try:
+            from app.ai.prompts.trending import generate_trending_keywords
+            data = await generate_trending_keywords(product, industry)
+            if data and isinstance(data, list) and len(data) > 0:
+                return data
+        except Exception as e:
+            logger.warning(f"⚠️ [FALLBACK WARNING] Trending keywords LLM step failed: {e}, using dynamic fallback")
+
+        from app.ai.mock_client import generate_mock_trending_keywords
+        return await generate_mock_trending_keywords(product, industry)
+
+
+async def _generate_competitors(product: str, industry: str) -> list[dict]:
+    if settings.use_mock_ai:
+        from app.ai.mock_client import generate_mock_competitors
+        return await generate_mock_competitors(product, industry)
+    else:
+        try:
+            from app.ai.prompts.competitors import generate_competitors
+            data = await generate_competitors(product, industry)
+            if data and isinstance(data, list) and len(data) > 0:
+                return data
+        except Exception as e:
+            logger.warning(f"⚠️ [FALLBACK WARNING] Competitor research LLM step failed: {e}, using dynamic fallback")
+
+        from app.ai.mock_client import generate_mock_competitors
+        return await generate_mock_competitors(product, industry)
+

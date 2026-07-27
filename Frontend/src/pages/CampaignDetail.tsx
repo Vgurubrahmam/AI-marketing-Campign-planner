@@ -2,18 +2,23 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, RefreshCw, Users, Target, Search, DollarSign, Calendar,
-  FileText, Download, Copy, Check, Printer, FileCode, Edit2, Save
+  FileText, Download, Copy, Check, Printer, FileCode, Edit2, Save,
+  TrendingUp, Shield
 } from 'lucide-react';
 import { useCampaign, useCampaignStatus, useRegenerateSection } from '../hooks/useCampaign';
 import { toast } from 'sonner';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import TrendingKeywordsCard from '../components/campaign/TrendingKeywordsCard';
+import CompetitorsCard from '../components/campaign/CompetitorsCard';
 
-const SECTION_ORDER = ['persona', 'ad_copy', 'keywords', 'budget', 'schedule', 'summary'];
+const SECTION_ORDER = ['persona', 'ad_copy', 'keywords', 'trending', 'competitors', 'budget', 'schedule', 'summary'];
 
 const SECTION_META: Record<string, { label: string; icon: any; color: string }> = {
   persona: { label: 'Audience Personas', icon: Users, color: '#818cf8' },
   ad_copy: { label: 'Ad Copy', icon: Target, color: '#06b6d4' },
   keywords: { label: 'Keywords', icon: Search, color: '#10b981' },
+  trending: { label: 'Trending Keywords', icon: TrendingUp, color: '#3b82f6' },
+  competitors: { label: 'Competitor Analysis', icon: Shield, color: '#f43f5e' },
   budget: { label: 'Budget Allocation', icon: DollarSign, color: '#f59e0b' },
   schedule: { label: 'Publishing Schedule', icon: Calendar, color: '#ec4899' },
   summary: { label: 'Campaign Summary', icon: FileText, color: '#8b5cf6' },
@@ -190,6 +195,8 @@ export default function CampaignDetail() {
                   {section === 'persona' && <PersonaSection personas={campaign.personas} onCopy={handleCopyText} copiedId={copiedId} />}
                   {section === 'ad_copy' && <AdCopySection copies={campaign.ad_copies} onCopy={handleCopyText} copiedId={copiedId} />}
                   {section === 'keywords' && <KeywordSection keywords={campaign.keywords} onCopy={handleCopyText} copiedId={copiedId} />}
+                  {section === 'trending' && <TrendingKeywordsCard trendingKeywords={campaign.trending_keywords} onCopy={handleCopyText} copiedId={copiedId} />}
+                  {section === 'competitors' && <CompetitorsCard competitors={campaign.competitors} onCopy={handleCopyText} copiedId={copiedId} />}
                   {section === 'budget' && <BudgetSection budgets={campaign.budgets} />}
                   {section === 'schedule' && <ScheduleSection plans={campaign.publishing_plans} />}
                   {section === 'summary' && <SummarySection summary={campaign.summary} onCopy={handleCopyText} copiedId={copiedId} campaign={campaign} />}
@@ -607,6 +614,24 @@ function generateMarkdown(campaign: any) {
     md += `|---|---|---|---|\n`;
     campaign.keywords.forEach((k: any) => {
       md += `| ${k.keyword} | ${k.keyword_type} | ${k.intent || '-'} | ${(k.relevance_score ? (k.relevance_score * 100).toFixed(0) + '%' : '-')} |\n`;
+    });
+    md += `\n`;
+  }
+
+  if (campaign.trending_keywords?.length) {
+    md += `## Real-Time Trending Keywords\n\n`;
+    campaign.trending_keywords.forEach((t: any) => {
+      md += `- **${t.keyword}:** ${t.reason}\n`;
+    });
+    md += `\n`;
+  }
+
+  if (campaign.competitors?.length) {
+    md += `## Competitor Research & Positioning\n\n`;
+    campaign.competitors.forEach((c: any) => {
+      md += `### ${c.name}\n`;
+      md += `**Market Positioning:** ${c.positioning}\n\n`;
+      md += `**Differentiator Opportunity:** ${c.differentiator_opportunity}\n\n`;
     });
     md += `\n`;
   }

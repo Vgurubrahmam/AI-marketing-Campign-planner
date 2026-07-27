@@ -84,8 +84,6 @@ def compute_budget_allocation(
         alloc["allocation_percent"] = round(
             alloc["allocation_percent"] / total_percent * 100, 2
         )
-        alloc["amount"] = round(
-            budget_amount * alloc["allocation_percent"] / 100, 2
-        )
+        alloc["amount"] = float(round(budget_amount * alloc["allocation_percent"] / 100))
 
     return allocations

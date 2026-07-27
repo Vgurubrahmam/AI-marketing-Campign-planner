@@ -110,3 +110,41 @@ class PublishingPlan(Base):
     content_summary: Mapped[str] = mapped_column(Text, nullable=False)
 
     campaign = relationship("Campaign", back_populates="publishing_plans")
+
+
+class TrendingKeyword(Base):
+    __tablename__ = "trending_keywords"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid
+    )
+    campaign_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    keyword: Mapped[str] = mapped_column(String(255), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+
+    campaign = relationship("Campaign", back_populates="trending_keywords")
+
+
+class Competitor(Base):
+    __tablename__ = "competitors"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=generate_uuid
+    )
+    campaign_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("campaigns.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    positioning: Mapped[str] = mapped_column(Text, nullable=False)
+    differentiator_opportunity: Mapped[str] = mapped_column(Text, nullable=False)
+
+    campaign = relationship("Campaign", back_populates="competitors")
+

@@ -17,10 +17,13 @@ def default_section_status() -> dict:
         "persona": "pending",
         "ad_copy": "pending",
         "keywords": "pending",
+        "trending": "pending",
+        "competitors": "pending",
         "budget": "pending",
         "schedule": "pending",
         "summary": "pending",
     }
+
 
 
 class Campaign(Base):
@@ -69,6 +72,12 @@ class Campaign(Base):
     )
     publishing_plans = relationship(
         "PublishingPlan", back_populates="campaign", cascade="all, delete-orphan"
+    )
+    trending_keywords = relationship(
+        "TrendingKeyword", back_populates="campaign", cascade="all, delete-orphan"
+    )
+    competitors = relationship(
+        "Competitor", back_populates="campaign", cascade="all, delete-orphan"
     )
 
     __table_args__ = (

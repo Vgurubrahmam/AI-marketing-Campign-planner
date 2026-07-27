@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # AI
     groq_api_key: str = ""
     groq_model: str = "llama-3.1-8b-instant"
+    tavily_api_key: str = ""
     use_mock_ai: bool = False
 
     # App

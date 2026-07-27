@@ -14,8 +14,10 @@ from app.models import (  # noqa: F401
     AudiencePersona,
     BudgetAllocation,
     Campaign,
+    Competitor,
     Keyword,
     PublishingPlan,
+    TrendingKeyword,
     User,
 )
 

@@ -23,7 +23,7 @@ class CampaignCreate(BaseModel):
 
 class RegenerateRequest(BaseModel):
     section: str = Field(
-        ..., pattern="^(persona|ad_copy|keywords|budget|schedule|summary)$"
+        ..., pattern="^(persona|ad_copy|keywords|trending|competitors|budget|schedule|summary)$"
     )
 
 
@@ -57,6 +57,23 @@ class KeywordResponse(BaseModel):
     keyword_type: str
     intent: str | None
     relevance_score: float | None
+
+    model_config = {"from_attributes": True}
+
+
+class TrendingKeywordResponse(BaseModel):
+    id: str
+    keyword: str
+    reason: str
+
+    model_config = {"from_attributes": True}
+
+
+class CompetitorResponse(BaseModel):
+    id: str
+    name: str
+    positioning: str
+    differentiator_opportunity: str
 
     model_config = {"from_attributes": True}
 
@@ -102,11 +119,14 @@ class CampaignResponse(BaseModel):
     personas: list[PersonaResponse] = []
     ad_copies: list[AdCopyResponse] = []
     keywords: list[KeywordResponse] = []
+    trending_keywords: list[TrendingKeywordResponse] = []
+    competitors: list[CompetitorResponse] = []
     budgets: list[BudgetResponse] = []
     publishing_plans: list[PublishingPlanResponse] = []
     summary: str | None = None
 
     model_config = {"from_attributes": True}
+
 
 
 class CampaignListResponse(BaseModel):

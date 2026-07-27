@@ -10,8 +10,10 @@ from app.models.campaign_sections import (
     AdCopy,
     AudiencePersona,
     BudgetAllocation,
+    Competitor,
     Keyword,
     PublishingPlan,
+    TrendingKeyword,
 )
 from app.schemas.campaign import CampaignCreate
 
@@ -45,6 +47,8 @@ class CampaignRepository:
                 selectinload(Campaign.personas),
                 selectinload(Campaign.ad_copies),
                 selectinload(Campaign.keywords),
+                selectinload(Campaign.trending_keywords),
+                selectinload(Campaign.competitors),
                 selectinload(Campaign.budgets),
                 selectinload(Campaign.publishing_plans),
             )
@@ -75,6 +79,8 @@ class CampaignRepository:
                 selectinload(Campaign.personas),
                 selectinload(Campaign.ad_copies),
                 selectinload(Campaign.keywords),
+                selectinload(Campaign.trending_keywords),
+                selectinload(Campaign.competitors),
                 selectinload(Campaign.budgets),
                 selectinload(Campaign.publishing_plans),
             )
@@ -241,12 +247,41 @@ class CampaignRepository:
         await self.db.flush()
         return models
 
+    async def add_trending_keywords(self, campaign_id: str, keywords: list[dict]) -> list[TrendingKeyword]:
+        models = []
+        for k in keywords:
+            model = TrendingKeyword(
+                campaign_id=str(campaign_id),
+                keyword=k.get("keyword", ""),
+                reason=k.get("reason", ""),
+            )
+            self.db.add(model)
+            models.append(model)
+        await self.db.flush()
+        return models
+
+    async def add_competitors(self, campaign_id: str, competitors: list[dict]) -> list[Competitor]:
+        models = []
+        for c in competitors:
+            model = Competitor(
+                campaign_id=str(campaign_id),
+                name=c.get("name", ""),
+                positioning=c.get("positioning", ""),
+                differentiator_opportunity=c.get("differentiator_opportunity", ""),
+            )
+            self.db.add(model)
+            models.append(model)
+        await self.db.flush()
+        return models
+
     async def clear_section(self, campaign_id: str, section: str) -> None:
         """Delete all records for a specific section of a campaign (for regeneration)."""
         model_map = {
             "persona": AudiencePersona,
             "ad_copy": AdCopy,
             "keywords": Keyword,
+            "trending": TrendingKeyword,
+            "competitors": Competitor,
             "budget": BudgetAllocation,
             "schedule": PublishingPlan,
         }
@@ -258,3 +293,4 @@ class CampaignRepository:
             for record in result.scalars().all():
                 await self.db.delete(record)
             await self.db.flush()
+

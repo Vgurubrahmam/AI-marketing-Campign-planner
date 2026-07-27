@@ -293,3 +293,56 @@ async def generate_mock_summary(campaign_data: dict) -> str:
     p3 = f"{random.choice(p3_openers)} {random.choice(p3_bodies)}"
 
     return f"{p1}\n\n{p2}\n\n{p3}"
+
+
+async def generate_mock_trending_keywords(product_description: str, industry: str = "general") -> list[dict]:
+    """Return dynamic mock trending keywords with rationale."""
+    await asyncio.sleep(random.uniform(0.2, 0.4))
+    domain_terms = _extract_domain_keywords(product_description, industry)
+    t1 = domain_terms[0] if len(domain_terms) > 0 else "smart"
+    t2 = domain_terms[1] if len(domain_terms) > 1 else "solution"
+
+    return [
+        {
+            "keyword": f"eco-friendly {t1} trends 2025",
+            "reason": f"Spike in consumer interest for sustainable and non-toxic {t1} alternatives.",
+        },
+        {
+            "keyword": f"AI-powered {t2} tools",
+            "reason": f"High search velocity around automation and smart productivity tools in {industry}.",
+        },
+        {
+            "keyword": f"best affordable {t1} for urban lifestyle",
+            "reason": f"Growing demand among metro consumers for cost-effective, high-quality {t1} products.",
+        },
+        {
+            "keyword": f"top rated {t1} reviews",
+            "reason": f"Viral social media discussions comparing leading brands in the {industry} market.",
+        },
+    ]
+
+
+async def generate_mock_competitors(product_description: str, industry: str = "general") -> list[dict]:
+    """Return dynamic mock competitors with positioning and differentiator opportunities."""
+    await asyncio.sleep(random.uniform(0.2, 0.4))
+    ind = industry.replace('_', ' ').capitalize()
+    prod_title = _extract_product_title(product_description)
+
+    return [
+        {
+            "name": f"BrandX {ind}",
+            "positioning": f"Legacy market leader offering broad {ind.lower()} solutions with high premium pricing.",
+            "differentiator_opportunity": f"Undersell on price while offering faster onboarding and modern features for '{prod_title}'.",
+        },
+        {
+            "name": f"Nova{ind} Solutions",
+            "positioning": f"Fast-growing D2C startup focused heavily on social media influencer marketing.",
+            "differentiator_opportunity": f"Highlight verified customer trust, superior product safety, and lifetime value.",
+        },
+        {
+            "name": f"Apex {ind} Group",
+            "positioning": "B2B enterprise provider with rigid enterprise sales cycles.",
+            "differentiator_opportunity": "Provide self-serve instant access, transparent INR pricing, and no long-term contracts.",
+        },
+    ]
+
