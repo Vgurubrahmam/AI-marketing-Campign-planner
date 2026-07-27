@@ -58,7 +58,22 @@ class CampaignRepository:
             query = query.where(Campaign.user_id == str(user_id))
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        campaign = result.scalar_one_or_none()
+        if campaign:
+            self._ensure_section_status_keys(campaign)
+        return campaign
+
+    def _ensure_section_status_keys(self, campaign: Campaign) -> None:
+        """Ensure legacy campaigns have all section keys in section_status dictionary."""
+        default_sections = ["persona", "ad_copy", "keywords", "trending", "competitors", "budget", "schedule", "summary"]
+        status_dict = dict(campaign.section_status or {})
+        modified = False
+        for sec in default_sections:
+            if sec not in status_dict:
+                status_dict[sec] = "done" if campaign.status == "complete" else "pending"
+                modified = True
+        if modified:
+            campaign.section_status = status_dict
 
     async def get_user_campaigns(
         self, user_id: str, page: int = 1, limit: int = 10
@@ -91,6 +106,8 @@ class CampaignRepository:
         )
         result = await self.db.execute(query)
         campaigns = list(result.scalars().all())
+        for c in campaigns:
+            self._ensure_section_status_keys(c)
 
         return campaigns, total
 

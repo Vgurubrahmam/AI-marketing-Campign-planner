@@ -35,7 +35,7 @@ export default function CampaignDetail() {
 
   const isGenerating = statusData?.status === 'generating';
   const sectionStatus = statusData?.section_status || {};
-  const statusDoneCount = Object.values(sectionStatus).filter((s) => s === 'done').length;
+  const statusDoneCount = SECTION_ORDER.filter((sec) => (sectionStatus[sec] || (statusData?.status === 'complete' ? 'done' : 'pending')) === 'done').length;
 
   const handleRegenerate = (section: string) => {
     regenerate.mutate(
@@ -146,7 +146,8 @@ export default function CampaignDetail() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {SECTION_ORDER.map((section) => {
           const meta = SECTION_META[section];
-          const status = sectionStatus[section] || 'pending';
+          const rawStatus = sectionStatus[section];
+          const status = rawStatus || (statusData?.status === 'complete' ? 'done' : 'pending');
           const Icon = meta.icon;
 
           return (
